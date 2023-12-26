@@ -28,6 +28,8 @@ include_directories(${SQLite3_INCLUDE_DIRS})
 find_package(Crow REQUIRED)
 include_directories(${Crow_INCLUDE_DIRS})
 
+include_directories(${CMAKE_SOURCE_DIR}/add_media_app)
+include_directories(${CMAKE_SOURCE_DIR}/database_manager)
 
 
 # Add executable for the server application
@@ -42,8 +44,9 @@ add_executable(GhostStreamingServer
 # Add executable for the add-media application
 add_executable(GhostStreamingAddMedia
         add_media_app/main.cpp
-        add_media_app/MetadataDatabase.cpp
-        streaming_server/MetadataDB.h
+        database_manager/DatabaseManager.cpp
+        database_manager/MediaCollection.cpp
+        database_manager/MediaMetadata.cpp
         # Add any other source files for the add-media app here
 )
 
