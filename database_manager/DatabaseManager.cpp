@@ -19,7 +19,14 @@ DatabaseManager::~DatabaseManager() {
     }
 }
 
-void DatabaseManager::initializeDatabase() {
+bool DatabaseManager::initializeDatabase() {
+    int rc = sqlite3_open(dbPath.c_str(), &db);
+
+    if (rc) {
+        std::cerr << "Error opening SQLite3 database: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
     // SQL statements to create tables
     const char* createMediaTableSql = R"(
         CREATE TABLE IF NOT EXISTS MediaMetadata (
@@ -30,10 +37,13 @@ void DatabaseManager::initializeDatabase() {
             duration INTEGER,
             genre TEXT,
             rating TEXT,
+            path TEXT,
             thumbnailPath TEXT,
             groupId INTEGER
         );
     )";
+
+
 
     const char* createCollectionTableSql = R"(
         CREATE TABLE IF NOT EXISTS MediaCollection (
@@ -45,7 +55,9 @@ void DatabaseManager::initializeDatabase() {
 
     executeStatement(createMediaTableSql);
     executeStatement(createCollectionTableSql);
-    // ... other initialization as needed ...
+
+    return true;
+
 }
 
 void DatabaseManager::executeStatement(const std::string& sql) {

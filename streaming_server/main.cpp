@@ -8,7 +8,7 @@ extern "C" {
 #include <libavutil/avutil.h>
 }
 
-#include "MetadataDB.h"
+#include "DatabaseManager.h"
 #include "api_endpoint.h"
 
 

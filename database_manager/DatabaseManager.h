@@ -13,7 +13,7 @@ public:
     DatabaseManager(const std::string& dbPath);
     ~DatabaseManager();
 
-    void initializeDatabase();
+    bool initializeDatabase();
     void addMediaItem(const MediaMetadata& media);
     MediaMetadata getMediaItem(int id);
     void updateMediaItem(const MediaMetadata& media);

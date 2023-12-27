@@ -1,31 +1,14 @@
-#include <json.hpp>
-#include <fstream>
-#include <iostream>
-#include "MediaMetadata.h"
-#include "MediaCollection.h"
 
-using json = nlohmann::json;
 
-int main() {
-    return 0;
 
-}
 
-// Load a single media item from JSON
-MediaMetadata loadMediaMetadata(const json& j) {
-    // Assuming 'j' is a JSON object representing a media item
-    int id = j.value("id", -1);
-    std::string title = j.value("title", "");
-    std::string description = j.value("description", "");
-    std::string releaseDate = j.value("releaseDate", "");
-    int duration = j.value("duration", 0);
-    std::string genre = j.value("genre", "");
-    std::string rating = j.value("rating", "");
-    std::string thumbnailPath = j.value("thumbnailPath", "");
 
-    return MediaMetadata(id, title, description, releaseDate, duration, genre, rating, thumbnailPath);
-}
 
+
+
+
+
+/*
 // Load a media collection along with its media items from a directory
 MediaCollection loadMediaCollection(const std::string& directoryPath) {
     // Load the collection metadata JSON file
@@ -40,7 +23,7 @@ MediaCollection loadMediaCollection(const std::string& directoryPath) {
 
     // Load each media item JSON file
     // Assume file names are known or can be discovered (e.g., iterating over directory files)
-    std::vector<std::string> mediaFilenames = {/* ... */};
+    std::vector<std::string> mediaFilenames = ;
     for (const auto& filename : mediaFilenames) {
         std::ifstream mediaFile(directoryPath + "/" + filename);
         json mediaJson;
@@ -52,3 +35,19 @@ MediaCollection loadMediaCollection(const std::string& directoryPath) {
 
     return collection;
 }
+*/
+
+#include <filesystem>
+#include "AddMedia.h"
+
+int main() {
+
+        std::filesystem::path cwd = std::filesystem::current_path();
+        std::filesystem::path configPath = cwd.parent_path() / "config.json";
+
+        AddMedia add_media = AddMedia(std::filesystem::absolute(configPath));
+
+        return 0;
+}
+
+

@@ -35,9 +35,10 @@ include_directories(${CMAKE_SOURCE_DIR}/database_manager)
 # Add executable for the server application
 add_executable(GhostStreamingServer
         streaming_server/main.cpp
-        streaming_server/MetadataDB.cpp
         streaming_server/api_endpoint.cpp
         streaming_server/api_endpoint.h
+        media_processor/MediaProcessor.cpp
+        media_processor/MediaProcessor.h
         # Add any other source files for the server app here
 )
 
@@ -47,6 +48,10 @@ add_executable(GhostStreamingAddMedia
         database_manager/DatabaseManager.cpp
         database_manager/MediaCollection.cpp
         database_manager/MediaMetadata.cpp
+        media_processor/MediaProcessor.cpp
+        media_processor/MediaProcessor.h
+        add_media_app/AddMedia.cpp
+        add_media_app/AddMedia.h
         # Add any other source files for the add-media app here
 )
 
