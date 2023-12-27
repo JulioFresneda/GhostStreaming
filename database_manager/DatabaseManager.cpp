@@ -7,6 +7,8 @@
 #include "DatabaseManager.h"
 #include <iostream>
 
+
+
 DatabaseManager::DatabaseManager(const std::string& dbPath) : dbPath(dbPath), db(nullptr) {
     if (sqlite3_open(dbPath.c_str(), &db) != SQLITE_OK) {
         std::cerr << "Error opening database: " << sqlite3_errmsg(db) << std::endl;

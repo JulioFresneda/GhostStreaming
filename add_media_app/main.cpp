@@ -39,13 +39,18 @@ MediaCollection loadMediaCollection(const std::string& directoryPath) {
 
 #include <filesystem>
 #include "AddMedia.h"
+#include "DatabaseManager.h"
 
 int main() {
 
         std::filesystem::path cwd = std::filesystem::current_path();
-        std::filesystem::path configPath = cwd.parent_path() / "config.json";
+        std::filesystem::path configPath = std::filesystem::absolute(cwd.parent_path() / "config.json");
 
-        AddMedia add_media = AddMedia(std::filesystem::absolute(configPath));
+        json configJson = AddMedia::loadJSONPath(configPath);
+        std::filesystem::path dbPath = std::filesystem::absolute(configJson.value("database_path",""));
+
+        DatabaseManager dbm = DatabaseManager(dbPath);
+        AddMedia add_media = AddMedia(configJson, dbm);
 
         return 0;
 }
