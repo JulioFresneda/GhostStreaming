@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.27)
 project(GhostStreaming)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17 )
+
+
 
 # Find the required FFmpeg libraries
 find_package(PkgConfig REQUIRED)
@@ -30,15 +32,16 @@ include_directories(${Crow_INCLUDE_DIRS})
 
 include_directories(${CMAKE_SOURCE_DIR}/add_media_app)
 include_directories(${CMAKE_SOURCE_DIR}/database_manager)
-
+include_directories(${CMAKE_SOURCE_DIR}/streaming_server)
 
 # Add executable for the server application
 add_executable(GhostStreamingServer
         streaming_server/main.cpp
         streaming_server/api_endpoint.cpp
-        streaming_server/api_endpoint.h
         media_processor/MediaProcessor.cpp
-        media_processor/MediaProcessor.h
+        database_manager/DatabaseManager.cpp
+        database_manager/MediaMetadata.cpp
+        database_manager/MediaCollection.cpp
         # Add any other source files for the server app here
 )
 

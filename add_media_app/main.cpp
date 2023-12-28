@@ -49,7 +49,9 @@ int main() {
         json configJson = AddMedia::loadJSONPath(configPath);
         std::filesystem::path dbPath = std::filesystem::absolute(configJson.value("database_path",""));
 
+
         DatabaseManager dbm = DatabaseManager(dbPath);
+        dbm.initializeDatabase();
         AddMedia add_media = AddMedia(configJson, dbm);
 
         return 0;

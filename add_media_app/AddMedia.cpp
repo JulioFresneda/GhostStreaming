@@ -26,15 +26,23 @@ AddMedia::AddMedia(const json& config, DatabaseManager& dbm) : dbm(dbm) {
         std::string sourcePath = mediaJson.value("sourcePath", "");
         std::string storePath = storeJson.value("store_path", "");
 
-        int cooked = mediaToChunks(sourcePath, storePath);
+        //int cooked = mediaToChunks(sourcePath, storePath);
+        int cooked = 0;
+        if(!cooked)
+        {
+            MediaMetadata media_metadata = loadMediaMetadata(mediaJson, storePath);
+            int result = dbm.addMediaItem(media_metadata);
+            if(result)
+            {
+                std::cout << "Error adding media" << std::endl;
+            }
+        }
 
     }
 }
 
 AddMedia::~AddMedia()
-{
-
-}
+= default;
 
 
 int AddMedia::mediaToChunks(const std::string& sourcePath, const std::string& storePath)
@@ -106,6 +114,7 @@ MediaMetadata AddMedia::loadMediaMetadata(const json& j, const std::string& stor
     float rating = j.value("rating", NULL);
     std::string thumbnailPath = j.value("thumbnailPath", "");
 
-
+    return MediaMetadata(title, description, releaseDate, duration, genre, rating, storePath, thumbnailPath);
 
 }
+

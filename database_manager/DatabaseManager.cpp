@@ -62,6 +62,65 @@ bool DatabaseManager::initializeDatabase() {
 
 }
 
+MediaMetadata DatabaseManager::getMediaItem(int id)
+{
+    std::string sql = "SELECT id, title, description, releaseDate, duration, genre, rating, path, thumbnailPath, groupId "
+                          "FROM MediaMetadata WHERE id = ?;";
+
+    sqlite3_stmt* stmt;
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+    sqlite3_bind_int(stmt, 1, id);
+
+    MediaMetadata media = MediaMetadata();
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        int metadata_id = sqlite3_column_int(stmt, 0);
+        media = MediaMetadata(
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)),
+            sqlite3_column_int(stmt, 4),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5)),
+            static_cast<float>(sqlite3_column_double(stmt, 6)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8))
+        );
+        media.setId(metadata_id);
+    }
+
+    sqlite3_finalize(stmt);
+    return media;
+}
+
+
+int DatabaseManager::addMediaItem(MediaMetadata& media) {
+    std::string sql = "INSERT INTO MediaMetadata (title, description, releaseDate, duration, genre, rating, path, thumbnailPath, groupId) "
+                          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+    sqlite3_stmt* stmt;
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+
+    // Bind values to the statement
+    sqlite3_bind_text(stmt, 1, media.getTitle().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, media.getDescription().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, media.getReleaseDate().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 4, media.getDuration());
+    sqlite3_bind_text(stmt, 5, media.getGenre().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_double(stmt, 6, media.getRating());
+    sqlite3_bind_text(stmt, 7, media.getPath().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 8, media.getThumbnailPath().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 9, media.getGroupId());
+
+    // Execute the statement
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+        std::cerr << "Error inserting data: " << sqlite3_errmsg(db) << std::endl;
+        return 1;
+    }
+
+    // Finalize the statement to prevent memory leaks
+    sqlite3_finalize(stmt);
+    return 0;
+}
+
 void DatabaseManager::executeStatement(const std::string& sql) {
     char* errorMessage = nullptr;
     if (sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &errorMessage) != SQLITE_OK) {

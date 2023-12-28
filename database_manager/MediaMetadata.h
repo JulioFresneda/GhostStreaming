@@ -21,6 +21,17 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const MediaMetadata& media);
 
+    int getId();
+    const std::string& getTitle() { return title; }
+    const std::string& getDescription() { return description; }
+    const std::string& getReleaseDate() { return releaseDate; }
+    int getDuration() { return duration; }            // Duration in seconds
+    const std::string& getGenre() { return genre; }
+    float getRating() { return rating; }
+    const std::string& getPath() { return path; }
+    const std::string& getThumbnailPath() { return thumbnailPath; }
+    int getGroupId() { return groupId; }
+
 private:
     int id;                  // Unique identifier
     std::string title;

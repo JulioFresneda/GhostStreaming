@@ -14,7 +14,7 @@ public:
     ~DatabaseManager();
 
     bool initializeDatabase();
-    void addMediaItem(const MediaMetadata& media);
+    int addMediaItem(MediaMetadata& media);
     MediaMetadata getMediaItem(int id);
     void updateMediaItem(const MediaMetadata& media);
     void deleteMediaItem(int id);

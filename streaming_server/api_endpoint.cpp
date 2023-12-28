@@ -4,8 +4,10 @@
 
 #include "api_endpoint.h"
 
+APIEndpoint::~APIEndpoint()
+= default;
 
-APIEndpoint::APIEndpoint(const MetadataDB &database): db(database) {
+APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
     crow::SimpleApp app;
 
     CROW_ROUTE(app, "/")([]() {
@@ -20,15 +22,8 @@ APIEndpoint::APIEndpoint(const MetadataDB &database): db(database) {
         crow::json::wvalue metadata = fetchMetadata(db, std::stoi(mediaId));
         return metadata;
     });
-    CROW_ROUTE(app, "/media/<string>")([this](const std::string &mediaId){
-        int result = db.loadMediaSegments(mediaId);
-        return result;
-    });
-    CROW_ROUTE(app, "/media/<string>/<int>")([this](const std::string &mediaId, int segmentNumber){
-            std::string segmentPath = db.getSegmentPath(mediaId, segmentNumber);
-            std::string fileContent = readFileContents(segmentPath);
-            return crow::response{fileContent};
-    });
+
+
 
     app.port(18080).multithreaded().run();
 }
@@ -41,19 +36,19 @@ std::string APIEndpoint::readFileContents(const std::string& filepath) {
 }
 
 
-crow::json::wvalue APIEndpoint::fetchMetadata(MetadataDB &db, const int &mediaId) {
+crow::json::wvalue APIEndpoint::fetchMetadata(DatabaseManager &db, const int &mediaId) {
     // Logic to fetch metadata goes here
     // For this example, returning dummy data
-    MovieMetadata metadata_raw = db.fetchMetadata(mediaId);
+    MediaMetadata metadata_raw = db.getMediaItem(mediaId);
 
     return to_json(metadata_raw);
 }
 
-crow::json::wvalue APIEndpoint::to_json(const MovieMetadata &metadata) {
+crow::json::wvalue APIEndpoint::to_json(MediaMetadata &metadata) {
     crow::json::wvalue json;
-    json["video_path"] = metadata.video_path;
-    json["title"] = metadata.title;
-    json["description"] = metadata.description;
-    json["id"] = metadata.id;
+    json["video_path"] = metadata.getPath();
+    json["title"] = metadata.getTitle();
+    json["description"] = metadata.getDescription();
+    json["id"] = metadata.getId();
     return json;
 }

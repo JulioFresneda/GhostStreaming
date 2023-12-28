@@ -24,7 +24,7 @@ public:
     static json loadJSONPath(const std::string& jsonPath);
     static bool isDirectory(const std::string& path);
     static std::string askForPath();
-    MediaMetadata loadMediaMetadata(const json& j);
+    MediaMetadata loadMediaMetadata(const json& j, const std::string& storePath);
 
 private:
     json mediaJson;
