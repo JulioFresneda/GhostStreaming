@@ -33,13 +33,5 @@ int getId()
 };
 
 
-const std::string& getDescription();
-const std::string& getReleaseDate();
-int getDuration();            // Duration in seconds
-const std::string& getGenre();
-float getRating();
-const std::string& getPath();
-const std::string& getThumbnailPath();
-int getGroupId();
 
 

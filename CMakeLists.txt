@@ -68,7 +68,8 @@ target_link_libraries(GhostStreamingServer
         ${AVUTIL_LIBRARIES}
         ${Boost_LIBRARIES}
         ${SQLite3_LIBRARIES}
-        ${Crow_INCLUDE_DIRS})
+        ${Crow_INCLUDE_DIRS}
+        pthread)
 
 
 

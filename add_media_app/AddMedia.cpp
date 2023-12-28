@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <iostream>
 #include <cstdlib>
+#include <dirent.h>
 #include "AddMedia.h"
 
 
@@ -18,13 +19,16 @@ using json = nlohmann::json;
 AddMedia::AddMedia(const json& config, DatabaseManager& dbm) : dbm(dbm) {
     std::string jsonPath = askForPath();
 
+
+    json storeJson = config;
+    std::string storePath = storeJson.value("store_path", "");
+
     if (!isDirectory(jsonPath))
     {
         collection = false;
         mediaJson = loadJSONPath(jsonPath);
-        json storeJson = config;
         std::string sourcePath = mediaJson.value("sourcePath", "");
-        std::string storePath = storeJson.value("store_path", "");
+
 
         //int cooked = mediaToChunks(sourcePath, storePath);
         int cooked = 0;
@@ -37,6 +41,40 @@ AddMedia::AddMedia(const json& config, DatabaseManager& dbm) : dbm(dbm) {
                 std::cout << "Error adding media" << std::endl;
             }
         }
+
+    }
+
+    else
+    {
+        collection = true;
+        std::string filename = "collection.json";
+        std::string dirname = "medias";
+
+
+        std::filesystem::path collectionPath = std::filesystem::path(jsonPath) / filename;
+        std::filesystem::path mediasPath = std::filesystem::path(jsonPath) / dirname;
+
+
+        DIR *dir;
+        struct dirent *ent;
+
+        if ((dir = opendir(mediasPath.c_str())) != nullptr)
+        {
+            while ((ent = readdir(dir)) != nullptr) {
+                // Check if it's a regular file
+                if (ent->d_type == DT_REG) {
+                    mediaJson = loadJSONPath(mediasPath / ent->d_name);
+                    std::string sourcePath = mediaJson.value("sourcePath", "");
+
+                    MediaMetadata media_metadata = loadMediaMetadata(mediaJson, storePath);
+                    int id = dbm.addMediaItem(media_metadata);
+                    std::cout << ent->d_name << std::endl;
+                }
+            }
+            closedir(dir);
+        }
+
+
 
     }
 }

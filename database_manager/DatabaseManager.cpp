@@ -113,7 +113,7 @@ int DatabaseManager::addMediaItem(MediaMetadata& media) {
     // Execute the statement
     if (sqlite3_step(stmt) != SQLITE_DONE) {
         std::cerr << "Error inserting data: " << sqlite3_errmsg(db) << std::endl;
-        return 1;
+        return -1;
     }
 
     // Finalize the statement to prevent memory leaks

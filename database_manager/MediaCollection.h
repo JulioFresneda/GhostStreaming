@@ -13,17 +13,26 @@ public:
     MediaCollection(const std::string& title, const std::string& description);
 
 
-    // ... Other getters and setters for each field ...
+    void setId(int id){ this->id = id; }
+    void addMediaToList(int id){ mediaList.push_back(id); }
 
-    void addMedia(const MediaMetadata& media);
-    const std::vector<MediaMetadata>& getMediaList() const;
+    int getId(){ return id; }
+    std::string getTitle(){ return title; }
+    std::string getDescription(){ return description; }
+    std::string getCategory(){ return category; }
+    int getRating(){ return rating; }
+    std::vector<int> getMediaList(){ return mediaList; }
+
+    const std::vector<int>& getMediaList() const;
     // ... Other methods for managing the collection ...
 
 private:
     int id = -1;                         // Unique identifier for the collection
     std::string title;
     std::string description;
-    std::vector<MediaMetadata> mediaList; // List of MediaMetadata objects in this collection
+    std::string category;
+    int rating;
+    std::vector<int> mediaList; // List of MediaMetadata objects in this collection
 };
 
 #endif // MEDIACOLLECTION_H

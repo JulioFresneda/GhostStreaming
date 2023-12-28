@@ -21,7 +21,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const MediaMetadata& media);
 
-    int getId();
+    int getId() { return id; }
     const std::string& getTitle() { return title; }
     const std::string& getDescription() { return description; }
     const std::string& getReleaseDate() { return releaseDate; }
