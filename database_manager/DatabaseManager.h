@@ -19,7 +19,7 @@ public:
     void updateMediaItem(const MediaMetadata& media);
     void deleteMediaItem(int id);
 
-    void addMediaCollection(const MediaCollection& collection);
+    int addMediaCollection(MediaCollection& collection);
     MediaCollection getMediaCollection(int id);
     // ... other methods as needed ...
 

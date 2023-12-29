@@ -21,8 +21,11 @@
     private:
         static std::string readFileContents(const std::string& filepath);
         static crow::json::wvalue fetchMetadata(DatabaseManager &metadata_db, const int &mediaId);
+        static crow::json::wvalue fetchCollection(DatabaseManager &metadata_db, const int &collectionId);
 
         static crow::json::wvalue to_json(MediaMetadata &metadata);
+        static crow::json::wvalue to_json(MediaCollection &metadata);
+
     };
 
 

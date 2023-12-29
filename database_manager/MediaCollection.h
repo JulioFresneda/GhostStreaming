@@ -10,7 +10,12 @@
 class MediaCollection {
 public:
     MediaCollection();
-    MediaCollection(const std::string& title, const std::string& description);
+    MediaCollection(const std::string& title, const std::string& description,
+        const std::string& category,
+        float rating,
+        const std::string& genre,
+        const std::string& thumbnailPath,
+        std::vector<int> mediaList);
 
 
     void setId(int id){ this->id = id; }
@@ -20,7 +25,9 @@ public:
     std::string getTitle(){ return title; }
     std::string getDescription(){ return description; }
     std::string getCategory(){ return category; }
-    int getRating(){ return rating; }
+    float getRating(){ return rating; }
+    std::string getThumbnailPath(){ return thumbnailPath; }
+    std::string getGenre(){ return genre; }
     std::vector<int> getMediaList(){ return mediaList; }
 
     const std::vector<int>& getMediaList() const;
@@ -31,7 +38,9 @@ private:
     std::string title;
     std::string description;
     std::string category;
-    int rating;
+    float rating;
+    std::string genre;
+    std::string thumbnailPath;
     std::vector<int> mediaList; // List of MediaMetadata objects in this collection
 };
 

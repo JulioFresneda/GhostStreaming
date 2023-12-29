@@ -6,7 +6,7 @@
 
 #include "DatabaseManager.h"
 #include <iostream>
-
+#include <sstream>
 
 
 DatabaseManager::DatabaseManager(const std::string& dbPath) : dbPath(dbPath), db(nullptr) {
@@ -51,7 +51,12 @@ bool DatabaseManager::initializeDatabase() {
         CREATE TABLE IF NOT EXISTS MediaCollection (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT,
-            description TEXT
+            description TEXT,
+            category TEXT,
+            rating INTEGER,
+            genre TEXT,
+            thumbnailPath TEXT,
+            mediaList TEXT
         );
     )";
 
@@ -91,6 +96,58 @@ MediaMetadata DatabaseManager::getMediaItem(int id)
     return media;
 }
 
+std::vector<int> stringToVector(const std::string& str) {
+    std::vector<int> result;
+    std::stringstream ss(str);
+    std::string item;
+
+    while (std::getline(ss, item, ',')) {
+        try {
+            result.push_back(std::stoi(item));
+        } catch (const std::invalid_argument& e) {
+            // Handle the case where the conversion fails
+            std::cerr << "Invalid argument: " << item << std::endl;
+        } catch (const std::out_of_range& e) {
+            // Handle the case where the integer is out of range
+            std::cerr << "Integer out of range: " << item << std::endl;
+        }
+    }
+
+    return result;
+}
+
+
+MediaCollection DatabaseManager::getMediaCollection(int id)
+{
+    std::string sql = "SELECT title, description, category, rating, genre, thumbnailPath, mediaList "
+                          "FROM MediaCollection WHERE id = ?;";
+
+    sqlite3_stmt* stmt;
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+    sqlite3_bind_int(stmt, 1, id);
+
+    MediaCollection collection = MediaCollection();
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+
+        std::string medialist_str = "1,2";
+        std::vector<int> mediaList = stringToVector(medialist_str);
+        collection = MediaCollection(
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4)),
+            static_cast<float>(sqlite3_column_double(stmt, 5)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7)),
+            mediaList
+        );
+        collection.setId(id);
+
+    }
+
+    sqlite3_finalize(stmt);
+    return collection;
+}
+
 
 int DatabaseManager::addMediaItem(MediaMetadata& media) {
     std::string sql = "INSERT INTO MediaMetadata (title, description, releaseDate, duration, genre, rating, path, thumbnailPath, groupId) "
@@ -116,9 +173,53 @@ int DatabaseManager::addMediaItem(MediaMetadata& media) {
         return -1;
     }
 
+    int lastId = sqlite3_last_insert_rowid(db);
+
     // Finalize the statement to prevent memory leaks
     sqlite3_finalize(stmt);
-    return 0;
+
+    return lastId;
+}
+
+
+int DatabaseManager::addMediaCollection(MediaCollection& collection) {
+    std::string sql = "INSERT INTO MediaCollection (title, description, category, rating, genre, thumbnailPath, mediaList) "
+                          "VALUES (?, ?, ?, ?, ?, ?, ?);";
+
+    std::stringstream ss;
+    std::vector<int> vec = collection.getMediaList();
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (i != 0) ss << ",";
+        ss << vec[i];
+    }
+    std::string vecAsString = ss.str();
+
+
+    sqlite3_stmt* stmt;
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+
+    // Bind values to the statement
+    sqlite3_bind_text(stmt, 1, collection.getTitle().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, collection.getDescription().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, collection.getCategory().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 4, collection.getRating());
+    sqlite3_bind_text(stmt, 5, collection.getGenre().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 6, collection.getThumbnailPath().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 7, vecAsString.c_str(), -1, SQLITE_TRANSIENT);
+
+
+    // Execute the statement
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+        std::cerr << "Error inserting data: " << sqlite3_errmsg(db) << std::endl;
+        return -1;
+    }
+
+    int lastId = sqlite3_last_insert_rowid(db);
+
+    // Finalize the statement to prevent memory leaks
+    sqlite3_finalize(stmt);
+
+    return lastId;
 }
 
 void DatabaseManager::executeStatement(const std::string& sql) {

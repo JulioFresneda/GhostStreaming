@@ -25,7 +25,7 @@ public:
     static bool isDirectory(const std::string& path);
     static std::string askForPath();
     MediaMetadata loadMediaMetadata(const json& j, const std::string& storePath);
-
+    MediaCollection loadMediaCollection(std::vector<int> mediaList, const json& j, const std::string& storePath);
 private:
     json mediaJson;
     json configJson;
@@ -33,6 +33,8 @@ private:
     bool collection;
     int mediaToChunks(const std::string& sourcePath, const std::string& storePath);
 
+    int AddMediaItem(const std::string& jsonPath, const std::string& storePath);
+    int AddMediaCollection(const std::string& jsonPath, const std::string& storePath);
 
 
 

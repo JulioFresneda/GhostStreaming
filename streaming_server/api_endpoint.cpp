@@ -18,9 +18,13 @@ APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
         //
         return "xddd";
     });
-    CROW_ROUTE(app, "/metadata/<string>")([this](const std::string &mediaId) {
+    CROW_ROUTE(app, "/media/<string>")([this](const std::string &mediaId) {
         crow::json::wvalue metadata = fetchMetadata(db, std::stoi(mediaId));
         return metadata;
+    });
+    CROW_ROUTE(app, "/collection/<string>")([this](const std::string &collectionId) {
+        crow::json::wvalue collection = fetchCollection(db, std::stoi(collectionId));
+        return collection;
     });
 
 
@@ -44,9 +48,24 @@ crow::json::wvalue APIEndpoint::fetchMetadata(DatabaseManager &db, const int &me
     return to_json(metadata_raw);
 }
 
+crow::json::wvalue APIEndpoint::fetchCollection(DatabaseManager &db, const int &collectionId) {
+    // Logic to fetch metadata goes here
+    // For this example, returning dummy data
+    MediaCollection metadata_raw = db.getMediaCollection(collectionId);
+    return to_json(metadata_raw);
+}
+
 crow::json::wvalue APIEndpoint::to_json(MediaMetadata &metadata) {
     crow::json::wvalue json;
     json["video_path"] = metadata.getPath();
+    json["title"] = metadata.getTitle();
+    json["description"] = metadata.getDescription();
+    json["id"] = metadata.getId();
+    return json;
+}
+
+crow::json::wvalue APIEndpoint::to_json(MediaCollection &metadata) {
+    crow::json::wvalue json;
     json["title"] = metadata.getTitle();
     json["description"] = metadata.getDescription();
     json["id"] = metadata.getId();
