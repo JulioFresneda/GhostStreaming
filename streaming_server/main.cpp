@@ -25,6 +25,7 @@ int main() {
     std::filesystem::path dbPath = std::filesystem::absolute(configJson.value("database_path",""));
 
     DatabaseManager db = DatabaseManager(dbPath);
+
     APIEndpoint api_endpoint = APIEndpoint(db);
 
 

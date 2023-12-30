@@ -129,15 +129,15 @@ MediaCollection DatabaseManager::getMediaCollection(int id)
     MediaCollection collection = MediaCollection();
     if (sqlite3_step(stmt) == SQLITE_ROW) {
 
-        std::string medialist_str = "1,2";
+        std::string medialist_str = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
         std::vector<int> mediaList = stringToVector(medialist_str);
         collection = MediaCollection(
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)),
             reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)),
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)),
+            static_cast<float>(sqlite3_column_double(stmt, 3)),
             reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4)),
-            static_cast<float>(sqlite3_column_double(stmt, 5)),
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6)),
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5)),
             mediaList
         );
         collection.setId(id);

@@ -11,7 +11,7 @@ APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
     crow::SimpleApp app;
 
     CROW_ROUTE(app, "/")([]() {
-        return "Hello world";
+        return "Ghost Streaming";
     });
 
     CROW_ROUTE(app, "/hehe")([]() {
