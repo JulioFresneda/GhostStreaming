@@ -7,6 +7,8 @@
 
 #include "DatabaseManager.h"
 #include <json.hpp>
+#include <pugixml.hpp>
+
 #include <fstream>
 #include <iostream>
 #include "MediaMetadata.h"
@@ -31,10 +33,13 @@ private:
     json configJson;
     DatabaseManager dbm;
     bool collection;
+    std::string fullPath;
     int mediaToChunks(const std::string& sourcePath, const std::string& storePath);
 
     int AddMediaItem(const std::string& jsonPath, const std::string& storePath);
     int AddMediaCollection(const std::string& jsonPath, const std::string& storePath);
+
+    static bool modifyMPD(const std::string& mpdFilePath, const std::string& apiBaseUrl);
 
 
 

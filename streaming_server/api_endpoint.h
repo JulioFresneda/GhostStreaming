@@ -26,6 +26,8 @@
         static crow::json::wvalue to_json(MediaMetadata &metadata);
         static crow::json::wvalue to_json(MediaCollection &metadata);
 
+        static crow::response getMPD(const std::string& mpdFilePath);
+
     };
 
 

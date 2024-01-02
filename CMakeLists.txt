@@ -34,11 +34,17 @@ include_directories(${CMAKE_SOURCE_DIR}/add_media_app)
 include_directories(${CMAKE_SOURCE_DIR}/database_manager)
 include_directories(${CMAKE_SOURCE_DIR}/streaming_server)
 
+include_directories("/usr/include/vlc")
+link_directories("/usr/include/vlc")
+
+link_directories("/usr/lib/x86_64-linux-gnu/")
+
+
+
 # Add executable for the server application
 add_executable(GhostStreamingServer
         streaming_server/main.cpp
         streaming_server/api_endpoint.cpp
-        media_processor/MediaProcessor.cpp
         database_manager/DatabaseManager.cpp
         database_manager/MediaMetadata.cpp
         database_manager/MediaCollection.cpp
@@ -51,10 +57,9 @@ add_executable(GhostStreamingAddMedia
         database_manager/DatabaseManager.cpp
         database_manager/MediaCollection.cpp
         database_manager/MediaMetadata.cpp
-        media_processor/MediaProcessor.cpp
-        media_processor/MediaProcessor.h
         add_media_app/AddMedia.cpp
         add_media_app/AddMedia.h
+        add_media_app/pugixml.cpp
         # Add any other source files for the add-media app here
 )
 
@@ -86,4 +91,5 @@ target_link_libraries(GhostStreamingClient
         ${AVCODEC_LIBRARIES}
         ${AVUTIL_LIBRARIES}
         ${Boost_LIBRARIES}
-        ${SQLite3_LIBRARIES})
+        ${SQLite3_LIBRARIES}
+        vlc vlccore)
