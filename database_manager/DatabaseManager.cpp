@@ -9,25 +9,23 @@
 #include <sstream>
 
 
-DatabaseManager::DatabaseManager(const std::string& dbPath) : dbPath(dbPath), db(nullptr) {
-    if (sqlite3_open(dbPath.c_str(), &db) != SQLITE_OK) {
-        std::cerr << "Error opening database: " << sqlite3_errmsg(db) << std::endl;
-    }
+DatabaseManager::DatabaseManager(const std::string& dbPath) : dbPath(dbPath){
+    initializeDatabase();
 }
 
 DatabaseManager::~DatabaseManager() {
-    if (db) {
-        sqlite3_close(db);
-    }
+
+}
+
+sqlite3* DatabaseManager::loadDB(const std::string& dbPath) {
+    sqlite3* db;
+    sqlite3_open(dbPath.c_str(), &db);
+    return db;
 }
 
 bool DatabaseManager::initializeDatabase() {
-    int rc = sqlite3_open(dbPath.c_str(), &db);
 
-    if (rc) {
-        std::cerr << "Error opening SQLite3 database: " << sqlite3_errmsg(db) << std::endl;
-        return false;
-    }
+
 
     // SQL statements to create tables
     const char* createMediaTableSql = R"(
@@ -60,8 +58,28 @@ bool DatabaseManager::initializeDatabase() {
         );
     )";
 
+    const char* createClientMetadataTableSql = R"(
+        CREATE TABLE IF NOT EXISTS ClientsMetadata (
+            code TEXT PRIMARY KEY,
+            clientName TEXT,
+            machineInfo TEXT,
+            userList TEXT
+        );
+    )";
+
+    const char* createTicketsTableSql = R"(
+        CREATE TABLE IF NOT EXISTS Tickets (
+            clientName TEXT,
+            machineInfo TEXT
+        );
+    )";
+
     executeStatement(createMediaTableSql);
     executeStatement(createCollectionTableSql);
+    executeStatement(createClientMetadataTableSql);
+    executeStatement(createTicketsTableSql);
+
+
 
     return true;
 
@@ -73,6 +91,8 @@ MediaMetadata DatabaseManager::getMediaItem(int id)
                           "FROM MediaMetadata WHERE id = ?;";
 
     sqlite3_stmt* stmt;
+
+    sqlite3* db = loadDB(dbPath);
     sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
     sqlite3_bind_int(stmt, 1, id);
 
@@ -93,6 +113,8 @@ MediaMetadata DatabaseManager::getMediaItem(int id)
     }
 
     sqlite3_finalize(stmt);
+    sqlite3_close(db);
+
     return media;
 }
 
@@ -123,6 +145,8 @@ MediaCollection DatabaseManager::getMediaCollection(int id)
                           "FROM MediaCollection WHERE id = ?;";
 
     sqlite3_stmt* stmt;
+    sqlite3* db = loadDB(dbPath);
+
     sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
     sqlite3_bind_int(stmt, 1, id);
 
@@ -145,6 +169,8 @@ MediaCollection DatabaseManager::getMediaCollection(int id)
     }
 
     sqlite3_finalize(stmt);
+
+    sqlite3_close(db);
     return collection;
 }
 
@@ -154,6 +180,8 @@ int DatabaseManager::addMediaItem(MediaMetadata& media) {
                           "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
     sqlite3_stmt* stmt;
+    sqlite3* db = loadDB(dbPath);
+
     sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
 
     // Bind values to the statement
@@ -178,6 +206,8 @@ int DatabaseManager::addMediaItem(MediaMetadata& media) {
     // Finalize the statement to prevent memory leaks
     sqlite3_finalize(stmt);
 
+    sqlite3_close(db);
+
     return lastId;
 }
 
@@ -196,6 +226,8 @@ int DatabaseManager::addMediaCollection(MediaCollection& collection) {
 
 
     sqlite3_stmt* stmt;
+    sqlite3* db = loadDB(dbPath);
+
     sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
 
     // Bind values to the statement
@@ -218,19 +250,91 @@ int DatabaseManager::addMediaCollection(MediaCollection& collection) {
 
     // Finalize the statement to prevent memory leaks
     sqlite3_finalize(stmt);
+    sqlite3_close(db);
 
     return lastId;
 }
 
 void DatabaseManager::executeStatement(const std::string& sql) {
+    sqlite3* db = loadDB(dbPath);
     char* errorMessage = nullptr;
     if (sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &errorMessage) != SQLITE_OK) {
         std::cerr << "SQL Error: " << errorMessage << std::endl;
         sqlite3_free(errorMessage);
     }
+    sqlite3_close(db);
 }
 
-// Implementations for addMediaItem, getMediaItem, updateMediaItem, deleteMediaItem,
-// addMediaCollection, getMediaCollection, etc., would follow a similar pattern,
-// preparing and executing SQL statements with sqlite3 functions.
+std::vector<std::string> splitString(const std::string& str, char delimiter) {
+    std::vector<std::string> result;
+    std::stringstream ss(str);
+    std::string item;
+
+    while (std::getline(ss, item, delimiter)) {
+        result.push_back(item);
+    }
+
+    return result;
+}
+
+bool DatabaseManager::getClientMetadata(const std::string& clientname, std::string &machineInfo, std::vector<std::string> &userList) {
+    std::string sqlQuery = "SELECT * FROM ClientsMetadata WHERE clientName = ?";
+
+    sqlite3_stmt* stmt;
+    bool exists = false;
+
+    sqlite3* db = loadDB(dbPath);
+
+    if (sqlite3_prepare_v2(db, sqlQuery.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, clientname.c_str(), -1, SQLITE_STATIC);
+
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            exists = true;
+            machineInfo = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+            std::string userliststr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+            userList = splitString(userliststr, ',');
+        }
+    }
+    else {
+        std::cout << sqlite3_errmsg(db) << std::endl;
+    }
+
+    sqlite3_reset(stmt);
+
+    // Finalize the statement to prevent memory leaks
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+    return exists;
+}
+
+
+void DatabaseManager::addTicket(const std::string& clientName, const std::string& machineInfo) {
+    std::string sql = "INSERT INTO Tickets (clientName, machineInfo) "
+                          "VALUES (?, ?);";
+
+    sqlite3_stmt* stmt;
+    sqlite3* db = loadDB(dbPath);
+
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+
+    // Bind values to the statement
+    sqlite3_bind_text(stmt, 1, clientName.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, machineInfo.c_str(), -1, SQLITE_TRANSIENT);
+
+    // Execute the statement
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+        std::cerr << "Error inserting data: " << sqlite3_errmsg(db) << std::endl;
+
+    }
+
+
+    // Finalize the statement to prevent memory leaks
+    sqlite3_finalize(stmt);
+
+    sqlite3_close(db);
+
+}
+
+
+
 

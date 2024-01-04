@@ -7,6 +7,7 @@
 
     #include "crow.h"
     #include "DatabaseManager.h"
+    #include "ClientManagement.h"
 
     class APIEndpoint {
     public:

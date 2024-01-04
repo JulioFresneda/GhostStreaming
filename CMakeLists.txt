@@ -48,6 +48,12 @@ add_executable(GhostStreamingServer
         database_manager/DatabaseManager.cpp
         database_manager/MediaMetadata.cpp
         database_manager/MediaCollection.cpp
+        streaming_server/UserManagement.cpp
+        streaming_server/UserManagement.h
+        streaming_server/User.cpp
+        streaming_server/User.h
+        streaming_server/ClientManagement.cpp
+        streaming_server/ClientManagement.h
         # Add any other source files for the server app here
 )
 

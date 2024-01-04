@@ -8,6 +8,8 @@
 #include <bits/fs_path.h>
 
 
+
+
 APIEndpoint::~APIEndpoint()
 = default;
 
@@ -17,7 +19,6 @@ APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
     CROW_ROUTE(app, "/")([]() {
         return "Ghost Streaming";
     });
-
     CROW_ROUTE(app, "/hehe")([]() {
         //
         return "xddd";
@@ -30,7 +31,6 @@ APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
         crow::json::wvalue collection = fetchCollection(db, std::stoi(collectionId));
         return collection;
     });
-
     CROW_ROUTE(app, "/media/<int>/chunks/mpd")
         ([&](int mediaId) {
             MediaMetadata metadata = db.getMediaItem(mediaId);
@@ -40,7 +40,6 @@ APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
 
             return APIEndpoint::getMPD(MPDName);
         });
-
     CROW_ROUTE(app, "/media/<int>/chunks/<string>")
     .methods("GET"_method)
     ([&](int mediaId, std::string chunkName) {
@@ -66,12 +65,60 @@ APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
 
         return resp;
     });
+    CROW_ROUTE(app, "/connect").methods(crow::HTTPMethod::POST)([this](const crow::request& req) {
+        // Parse the JSON body
+        auto x = crow::json::load(req.body);
+
+        if (!x) {
+            return crow::response(400, "Invalid JSON");
+        }
+
+        // Access data from JSON object
+        std::string clientName = x["clientName"].s();
+        std::cout << "Received message from: " << clientName << std::endl;
+
+        std::string machineInfo = x["machineInfo"].s();
+        std::cout << "Machine Info: " << machineInfo << std::endl;
+
+
+
+        ClientStatus userStatus = ClientManagement::checkClientStatus(db, clientName, machineInfo);
+
+
+        // Create a JSON response
+        crow::json::wvalue response;
+        if(userStatus == ClientStatus::NEW) {
+            response["authorized"] = false;
+            response["status"] = "NEW";
+            response["response"] = "New client. Ticket added.";
+        }
+        else {
+            if(userStatus == ClientStatus::NEW_MACHINE) {
+                response["authorized"] = false;
+                response["status"] = "NEWMACHINE";
+                response["response"] = "New machine. Ticket added.";
+
+            }
+            else {
+                if(userStatus == ClientStatus::USER) {
+                    response["authorized"] = true;
+                    response["status"] = "USER";
+                    response["response"] = "Welcome back.";
+
+                }
+            }
+        }
+
+        return crow::response{response};
+    });
+
 
 
 
 
     app.port(18080).multithreaded().run();
 }
+
 
 std::string APIEndpoint::readFileContents(const std::string& filepath) {
     std::ifstream fileStream(filepath, std::ios::binary);

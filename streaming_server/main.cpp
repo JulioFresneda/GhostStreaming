@@ -26,6 +26,7 @@ int main() {
 
     DatabaseManager db = DatabaseManager(dbPath);
 
+
     APIEndpoint api_endpoint = APIEndpoint(db);
 
 

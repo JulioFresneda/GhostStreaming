@@ -21,10 +21,14 @@ public:
 
     int addMediaCollection(MediaCollection& collection);
     MediaCollection getMediaCollection(int id);
-    // ... other methods as needed ...
+
+    bool getClientMetadata(const std::string& clientname, std::string &machineInfo, std::vector<std::string> &userList);
+    void addTicket(const std::string& clientname, const std::string &machineInfo);
+
+    sqlite3* loadDB(const std::string& dbPath);
+
 
 private:
-    sqlite3* db;
     std::string dbPath;
 
     void executeStatement(const std::string& sql);
