@@ -6,13 +6,14 @@
 
 
 
-ClientStatus ClientManagement::checkClientStatus(DatabaseManager db, const std::string& clientname, const std::string &machineInfo) {
+ClientStatus ClientManagement::checkClientStatus(DatabaseManager db, const std::string& clientname, const std::string &machineInfo, const std::string &code) {
     std::string dbMachineInfo = "";
-    std::vector<std::string> userlist;
+    std::string dbCode = "";
 
-    bool clientMetadata = db.getClientMetadata(clientname, dbMachineInfo, userlist);
+    bool clientMetadata = db.getClientMetadata(clientname, dbMachineInfo, dbCode);
 
-    if (dbMachineInfo == machineInfo){return ClientStatus::USER;}
+    if (dbMachineInfo == machineInfo and code == dbCode){return ClientStatus::USER;}
+    if (dbMachineInfo == machineInfo){return ClientStatus::CODE_ERROR;}
     db.addTicket(clientname, machineInfo);
     if (!clientMetadata){return ClientStatus::NEW;}
     {return ClientStatus::NEW_MACHINE;}

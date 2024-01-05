@@ -13,12 +13,13 @@
 enum class ClientStatus {
     NEW,
     NEW_MACHINE,
-    USER
+    USER,
+    CODE_ERROR
 };
 
 class ClientManagement {
 public:
-    static ClientStatus checkClientStatus(DatabaseManager db, const std::string& clientname, const std::string &machineInfo);
+    static ClientStatus checkClientStatus(DatabaseManager db, const std::string& clientname, const std::string &machineInfo, const std::string &code);
     static void generateTicket(const std::string& clientName, const std::string& machineInfo);
 
 };

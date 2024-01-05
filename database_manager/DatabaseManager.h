@@ -22,8 +22,13 @@ public:
     int addMediaCollection(MediaCollection& collection);
     MediaCollection getMediaCollection(int id);
 
-    bool getClientMetadata(const std::string& clientname, std::string &machineInfo, std::vector<std::string> &userList);
-    void addTicket(const std::string& clientname, const std::string &machineInfo);
+    bool getClientMetadata(const std::string& clientname, std::string& machineInfo, std::string& code);
+    bool updateClientMetadata(const std::string& clientname, const std::vector<std::string>& userList);
+
+
+    void addTicket(const std::string& clientName, const std::string &machineInfo);
+    bool addUser(const std::string& clientName, const std::string &userName);
+    bool deleteUser(const std::string& clientName, const std::string &userName);
 
     sqlite3* loadDB(const std::string& dbPath);
 

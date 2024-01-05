@@ -7,7 +7,7 @@
 #include <string>
 #include <bits/fs_path.h>
 
-
+#include "UserManagement.h"
 
 
 APIEndpoint::~APIEndpoint()
@@ -80,9 +80,12 @@ APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
         std::string machineInfo = x["machineInfo"].s();
         std::cout << "Machine Info: " << machineInfo << std::endl;
 
+        std::string code = x["code"].s();
+        std::cout << "Code: " << code << std::endl;
 
 
-        ClientStatus userStatus = ClientManagement::checkClientStatus(db, clientName, machineInfo);
+
+        ClientStatus userStatus = ClientManagement::checkClientStatus(db, clientName, machineInfo, code);
 
 
         // Create a JSON response
@@ -106,14 +109,82 @@ APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
                     response["response"] = "Welcome back.";
 
                 }
+                else {
+                    response["authorized"] = false;
+                    response["status"] = "CODE_ERROR";
+                    response["response"] = "Incorrect code.";
+                }
             }
         }
 
         return crow::response{response};
     });
 
+    CROW_ROUTE(app, "/user/create").methods(crow::HTTPMethod::POST)([this](const crow::request& req) {
+        // Parse the JSON body
+        auto x = crow::json::load(req.body);
+
+        if (!x) {
+            return crow::response(400, "Invalid JSON");
+        }
+
+        // Access data from JSON object
+        std::string clientName = x["clientName"].s();
+        std::cout << "Received message from: " << clientName << std::endl;
+
+        std::string userName = x["userName"].s();
+        std::cout << "User: " << userName << std::endl;
 
 
+
+        bool added = db.addUser(clientName, userName);
+        // Create a JSON response
+        crow::json::wvalue response;
+        if(added) {
+            response["status"] = "OK";
+            response["response"] = "User added!";
+        }
+        else {
+            response["status"] = "error";
+            response["response"] = "User already exists!";
+        }
+
+
+        return crow::response{response};
+    });
+
+    CROW_ROUTE(app, "/user/delete").methods(crow::HTTPMethod::POST)([this](const crow::request& req) {
+        // Parse the JSON body
+        auto x = crow::json::load(req.body);
+
+        if (!x) {
+            return crow::response(400, "Invalid JSON");
+        }
+
+        // Access data from JSON object
+        std::string clientName = x["clientName"].s();
+        std::cout << "Received message from: " << clientName << std::endl;
+
+        std::string userName = x["userName"].s();
+        std::cout << "User: " << userName << std::endl;
+
+
+
+        bool deleted = db.deleteUser(clientName, userName);
+        // Create a JSON response
+        crow::json::wvalue response;
+        if(deleted) {
+            response["status"] = "OK";
+            response["response"] = "User deleted!";
+        }
+        else {
+            response["status"] = "error";
+            response["response"] = "User does not exist!";
+        }
+
+
+        return crow::response{response};
+    });
 
 
     app.port(18080).multithreaded().run();

@@ -59,11 +59,22 @@ bool DatabaseManager::initializeDatabase() {
     )";
 
     const char* createClientMetadataTableSql = R"(
-        CREATE TABLE IF NOT EXISTS ClientsMetadata (
+        CREATE TABLE IF NOT EXISTS ClientMetadata (
             code TEXT PRIMARY KEY,
             clientName TEXT,
-            machineInfo TEXT,
-            userList TEXT
+            machineInfo TEXT        );
+    )";
+
+    const char* createUserMetadataTableSql = R"(
+        CREATE TABLE IF NOT EXISTS UserMetadata (
+            userName TEXT,
+            clientName TEXT,
+            favList TEXT,
+            repList TEXT,
+            watchLater TEXT,
+            watched TEXT,
+            watching TEXT,
+            PRIMARY KEY( userName, clientName)
         );
     )";
 
@@ -77,6 +88,7 @@ bool DatabaseManager::initializeDatabase() {
     executeStatement(createMediaTableSql);
     executeStatement(createCollectionTableSql);
     executeStatement(createClientMetadataTableSql);
+    executeStatement(createUserMetadataTableSql);
     executeStatement(createTicketsTableSql);
 
 
@@ -277,8 +289,8 @@ std::vector<std::string> splitString(const std::string& str, char delimiter) {
     return result;
 }
 
-bool DatabaseManager::getClientMetadata(const std::string& clientname, std::string &machineInfo, std::vector<std::string> &userList) {
-    std::string sqlQuery = "SELECT * FROM ClientsMetadata WHERE clientName = ?";
+bool DatabaseManager::getClientMetadata(const std::string& clientname, std::string &machineInfo, std::string &code) {
+    std::string sqlQuery = "SELECT * FROM ClientMetadata WHERE clientName = ?";
 
     sqlite3_stmt* stmt;
     bool exists = false;
@@ -291,8 +303,8 @@ bool DatabaseManager::getClientMetadata(const std::string& clientname, std::stri
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             exists = true;
             machineInfo = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-            std::string userliststr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
-            userList = splitString(userliststr, ',');
+            code = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+
         }
     }
     else {
@@ -306,6 +318,8 @@ bool DatabaseManager::getClientMetadata(const std::string& clientname, std::stri
     sqlite3_close(db);
     return exists;
 }
+
+
 
 
 void DatabaseManager::addTicket(const std::string& clientName, const std::string& machineInfo) {
@@ -333,6 +347,62 @@ void DatabaseManager::addTicket(const std::string& clientName, const std::string
 
     sqlite3_close(db);
 
+}
+
+bool DatabaseManager::addUser(const std::string& clientName, const std::string &userName) {
+    sqlite3* db = loadDB(dbPath);
+
+    std::string sqlQuery = "INSERT OR IGNORE INTO UserMetadata (userName, clientName, favList, "
+                           "repList, watchLater, watched, watching) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    bool inserted = true;
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sqlQuery.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        // Bind values for UserID, RoleID, and AssignedDate
+
+        sqlite3_bind_text(stmt, 1, userName.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 2, clientName.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 3, "", -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 4, "", -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 5, "", -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 6, "", -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 7, "", -1, SQLITE_STATIC);
+
+        if (sqlite3_step(stmt) != SQLITE_DONE) {
+            inserted = false;
+        }
+
+        sqlite3_finalize(stmt);
+    } else {
+        inserted = false;
+    }
+
+    sqlite3_close(db);
+    return inserted;
+}
+
+bool DatabaseManager::deleteUser(const std::string& clientName, const std::string &userName) {
+    sqlite3* db = loadDB(dbPath);
+
+    std::string sqlQuery = "DELETE FROM UserMetadata WHERE clientName = ? AND userName = ?";
+    bool inserted = true;
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sqlQuery.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        // Bind values for UserID, RoleID, and AssignedDate
+
+        sqlite3_bind_text(stmt, 2, userName.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 1, clientName.c_str(), -1, SQLITE_STATIC);
+
+        if (sqlite3_step(stmt) != SQLITE_DONE) {
+            inserted = false;
+        }
+
+        sqlite3_finalize(stmt);
+    } else {
+        inserted = false;
+    }
+
+    sqlite3_close(db);
+    return inserted;
 }
 
 
