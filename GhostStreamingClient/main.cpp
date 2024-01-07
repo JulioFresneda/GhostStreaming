@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
     QPalette pal = w.palette();
     pal.setColor(QPalette::Window, QColor(0, 0, 0));
     w.setPalette(pal);
+    w.setFixedSize(800, 600);
     w.show();
     return a.exec();
 }

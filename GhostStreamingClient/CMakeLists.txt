@@ -33,7 +33,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         selectuser.h selectuser.cpp
         servercommunication.h servercommunication.cpp
-        newuserdialog.h newuserdialog.cpp newuserdialog.ui
+        AddUserWidget.ui
+        AddUserWidget.h AddUserWidget.cpp
+        SplashScreen.h SplashScreen.cpp
+
 
     )
 # Define target properties for Android with Qt 6 as:

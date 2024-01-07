@@ -11,8 +11,10 @@
 #include <QParallelAnimationGroup>
 #include <QTimer>
 #include <QToolButton>
+#include <QStackedWidget>
 
-#include "servercommunication.h"
+#include "AddUserWidget.h"
+#include "ui_mainwindow.h"
 
 class MainWindow : public QMainWindow
 {
@@ -27,6 +29,10 @@ private:
     QLabel *titleLabel;
     QHBoxLayout *buttonLayout;
     QSequentialAnimationGroup *animationGroup;
+    Ui::MainWindow *ui;
+
+    AddUserWidget *addUserWidget;
+    QStackedWidget *stackedWidget;
 
     void setupUI();
     void setupAnimations();
@@ -38,6 +44,11 @@ private:
     void loadUserButtons();
     void animateButtonAppearance(QToolButton *button);
     std::vector<std::string> getUsers();
+
+    void onNewUserClicked();
+
+    void loadAddUserUI();
+    void loadMainWindow();
 };
 
 #endif // MAINWINDOW_H
