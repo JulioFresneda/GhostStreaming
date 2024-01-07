@@ -16,6 +16,7 @@
 class UserManagement {
 public:
     static bool addUser(DatabaseManager& db, const std::string& clientName, const std::string &userName);
+    static std::vector<std::string> getUsers(DatabaseManager& db, const std::string& clientName);
 };
 
 

@@ -186,6 +186,25 @@ APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
         return crow::response{response};
     });
 
+    CROW_ROUTE(app, "/user/list").methods(crow::HTTPMethod::POST)([this](const crow::request& req) {
+        // Parse the JSON body
+        auto x = crow::json::load(req.body);
+
+        if (!x) {
+            return crow::response(400, "Invalid JSON");
+        }
+
+        // Access data from JSON object
+        std::string clientName = x["clientName"].s();
+        std::cout << "Received message from: " << clientName << std::endl;
+
+        std::vector<std::string> users = db.getUsers(clientName);
+        // Create a JSON response
+
+        crow::json::wvalue response;
+        response["users"] = users;
+        return crow::response{response};
+    });
 
     app.port(18080).multithreaded().run();
 }

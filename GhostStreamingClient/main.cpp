@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     QPalette pal = w.palette();
-    pal.setColor(QPalette::Window, QColor(0,0,0));
+    pal.setColor(QPalette::Window, QColor(0, 0, 0));
     w.setPalette(pal);
     w.show();
     return a.exec();

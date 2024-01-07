@@ -289,7 +289,7 @@ std::vector<std::string> splitString(const std::string& str, char delimiter) {
     return result;
 }
 
-bool DatabaseManager::getClientMetadata(const std::string& clientname, std::string &machineInfo, std::string &code) {
+bool DatabaseManager::getClientMetadata(const std::string& clientName, std::string &machineInfo, std::string &code) {
     std::string sqlQuery = "SELECT * FROM ClientMetadata WHERE clientName = ?";
 
     sqlite3_stmt* stmt;
@@ -298,7 +298,7 @@ bool DatabaseManager::getClientMetadata(const std::string& clientname, std::stri
     sqlite3* db = loadDB(dbPath);
 
     if (sqlite3_prepare_v2(db, sqlQuery.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, clientname.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 1, clientName.c_str(), -1, SQLITE_STATIC);
 
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             exists = true;
@@ -403,6 +403,35 @@ bool DatabaseManager::deleteUser(const std::string& clientName, const std::strin
 
     sqlite3_close(db);
     return inserted;
+}
+
+std::vector<std::string> DatabaseManager::getUsers(const std::string& clientName) {
+    std::string sqlQuery = "SELECT * FROM UserMetadata WHERE clientName = ?";
+
+    sqlite3_stmt* stmt;
+    std::vector<std::string> user_list;
+
+    sqlite3* db = loadDB(dbPath);
+
+    if (sqlite3_prepare_v2(db, sqlQuery.c_str(), -1, &stmt, NULL) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, clientName.c_str(), -1, SQLITE_STATIC);
+
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            std::string user = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            user_list.push_back(user);
+
+        }
+    }
+    else {
+        std::cout << sqlite3_errmsg(db) << std::endl;
+    }
+
+    sqlite3_reset(stmt);
+
+    // Finalize the statement to prevent memory leaks
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+    return user_list;
 }
 
 

@@ -14,11 +14,11 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(0, 0, 0);</string>
+   <string notr="true">background-color: #060A18;</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(0, 0, 0);</string>
+    <string notr="true">background-color: #060A18;</string>
    </property>
   </widget>
   <widget class="QMenuBar" name="menubar">

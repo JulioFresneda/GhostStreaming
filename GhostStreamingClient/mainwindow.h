@@ -10,6 +10,9 @@
 #include <QGraphicsOpacityEffect>
 #include <QParallelAnimationGroup>
 #include <QTimer>
+#include <QToolButton>
+
+#include "servercommunication.h"
 
 class MainWindow : public QMainWindow
 {
@@ -30,6 +33,11 @@ private:
     void animateTitleDisappear();
     void animateButtonsAppear();
     void loadButtons(int numberOfButtons);
+    void animateTitleDisappearance();
+
+    void loadUserButtons();
+    void animateButtonAppearance(QToolButton *button);
+    std::vector<std::string> getUsers();
 };
 
 #endif // MAINWINDOW_H
