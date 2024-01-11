@@ -11,9 +11,9 @@ class ServerCommunication
 {
 public:
     ServerCommunication();
-    static std::vector<std::string> GetUsers(std::string url, std::string clientName);
-    static std::vector<std::string> AddUser(std::string url, std::string clientName, std::string newUsername);
-
+    static void GetUsers(std::string url, std::string clientName, std::vector<std::string>& userList, std::vector<std::string>& profilePics);
+    static std::vector<std::string> AddUser(std::string url, std::string clientName, std::string newUsername, std::string profilePic);
+    static void GetGenres();
 };
 
 #endif // SERVERCOMMUNICATION_H

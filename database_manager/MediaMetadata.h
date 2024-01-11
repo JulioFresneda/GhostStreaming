@@ -5,6 +5,7 @@
 
 #include <string>
 #include <ostream>
+#include <vector>
 
 class MediaMetadata {
 public:
@@ -26,7 +27,8 @@ public:
     const std::string& getDescription() { return description; }
     const std::string& getReleaseDate() { return releaseDate; }
     int getDuration() { return duration; }            // Duration in seconds
-    const std::string& getGenre() { return genre; }
+    std::vector<std::string> getGenresSplitted();
+    const std::string& getGenres() { return genres; }
     float getRating() { return rating; }
     const std::string& getPath() { return path; }
     const std::string& getThumbnailPath() { return thumbnailPath; }
@@ -38,7 +40,7 @@ private:
     std::string description;
     std::string releaseDate;
     int duration;            // Duration in seconds
-    std::string genre;
+    std::string genres;
     float rating;
     std::string path;
     std::string thumbnailPath;

@@ -185,11 +185,11 @@ MediaMetadata AddMedia::loadMediaMetadata(const json& j, const std::string& stor
     std::string description = j.value("description", "");
     std::string releaseDate = j.value("releaseDate", "");
     int duration = j.value("duration", 0);
-    std::string genre = j.value("genre", "");
+    std::string genres = j.value("genres", "");
     float rating = j.value("rating", NULL);
     std::string thumbnailPath = j.value("thumbnailPath", "");
 
-    return MediaMetadata(title, description, releaseDate, duration, genre, rating, storePath, thumbnailPath);
+    return MediaMetadata(title, description, releaseDate, duration, genres, rating, storePath, thumbnailPath);
 
 }
 

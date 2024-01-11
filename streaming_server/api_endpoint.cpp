@@ -5,8 +5,11 @@
 #include "api_endpoint.h"
 
 #include <string>
+#include <string>
+#include <string>
 #include <bits/fs_path.h>
 
+#include "MetadataManagement.h"
 #include "UserManagement.h"
 
 
@@ -135,9 +138,11 @@ APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
         std::string userName = x["userName"].s();
         std::cout << "User: " << userName << std::endl;
 
+        std::string profilePic = x["profilePic"].s();
 
 
-        bool added = db.addUser(clientName, userName);
+
+        bool added = db.addUser(clientName, userName, profilePic);
         // Create a JSON response
         crow::json::wvalue response;
         if(added) {
@@ -198,13 +203,28 @@ APIEndpoint::APIEndpoint(const DatabaseManager &database): db(database) {
         std::string clientName = x["clientName"].s();
         std::cout << "Received message from: " << clientName << std::endl;
 
-        std::vector<std::string> users = db.getUsers(clientName);
+
+        std::vector<std::string> users;
+        std::vector<std::string> profilePics;
+        db.getUsers(clientName, users, profilePics);
         // Create a JSON response
 
         crow::json::wvalue response;
         response["users"] = users;
+        response["profilePics"] = profilePics;
         return crow::response{response};
     });
+
+
+    CROW_ROUTE(app, "/metadata/bygenre")([this]() {
+        std::unordered_map<std::string, std::vector<int>> allMediaMetadata = MetadataManagement::getGenres(db);
+        json j = allMediaMetadata;
+        return j.dump();
+
+    });
+
+
+
 
     app.port(18080).multithreaded().run();
 }
@@ -235,10 +255,15 @@ crow::json::wvalue APIEndpoint::fetchCollection(DatabaseManager &db, const int &
 
 crow::json::wvalue APIEndpoint::to_json(MediaMetadata &metadata) {
     crow::json::wvalue json;
-    json["video_path"] = metadata.getPath();
+    json["videoPath"] = metadata.getPath();
     json["title"] = metadata.getTitle();
     json["description"] = metadata.getDescription();
     json["id"] = metadata.getId();
+    json["releaseDate"] = metadata.getReleaseDate();
+    json["duration"] = std::to_string(metadata.getId());
+    json["genres"] = metadata.getGenres();
+    json["thumbnailPath"] = metadata.getThumbnailPath();
+    json["groupId"] = std::to_string(metadata.getGroupId());
     return json;
 }
 

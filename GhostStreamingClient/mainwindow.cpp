@@ -1,6 +1,5 @@
 #include "mainwindow.h"
-#include "AddUserWidget.h"
-#include "SplashScreen.h"
+
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -16,8 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
     stackedWidget = new QStackedWidget(this);
     setCentralWidget(stackedWidget);
 
-    SplashScreen* splashScreen = new SplashScreen(this);
-    AddUserWidget* addUserWidget = new AddUserWidget(this);
+    splashScreen = new SplashScreen(this);
+    addUserWidget = new AddUserWidget(this);
 
     stackedWidget->addWidget(splashScreen);
     stackedWidget->addWidget(addUserWidget);
@@ -26,7 +25,10 @@ MainWindow::MainWindow(QWidget *parent)
     stackedWidget->setCurrentWidget(splashScreen);
 
     connect(splashScreen, &SplashScreen::addUserSignal, this, &MainWindow::loadAddUserUI);
+    connect(splashScreen, &SplashScreen::userSelectedSignal, this, &MainWindow::loadStreamingWindow);
+
     connect(addUserWidget, &AddUserWidget::comebackSignal, this, &MainWindow::loadMainWindow);
+    connect(addUserWidget, &AddUserWidget::reloadButtonsSignal, this, &MainWindow::reloadMainWindow);
 
 
 
@@ -47,7 +49,26 @@ void MainWindow::loadAddUserUI(){
 
 void MainWindow::loadMainWindow(){
     qDebug() << "Load main window";
+
     stackedWidget->setCurrentIndex(0);
+}
+
+void MainWindow::reloadMainWindow(){
+    qDebug() << "Reload main window";
+    splashScreen->reloadUserButtons();
+    stackedWidget->setCurrentIndex(0);
+}
+
+void MainWindow::loadStreamingWindow(){
+    QWidget* currentCentralWidget = this->centralWidget();
+    if (currentCentralWidget != nullptr) {
+        currentCentralWidget->deleteLater(); // or this->takeCentralWidget();
+    }
+
+    StreamingWindow* newContent = new StreamingWindow(this);
+    this->setCentralWidget(newContent);
+
+
 }
 
 

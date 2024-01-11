@@ -16,6 +16,9 @@
 #include "AddUserWidget.h"
 #include "ui_mainwindow.h"
 
+#include "SplashScreen.h"
+#include "streamingwindow.h"
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -31,8 +34,14 @@ private:
     QSequentialAnimationGroup *animationGroup;
     Ui::MainWindow *ui;
 
-    AddUserWidget *addUserWidget;
+    SplashScreen* splashScreen;
+    AddUserWidget* addUserWidget;
+
+
     QStackedWidget *stackedWidget;
+
+
+
 
     void setupUI();
     void setupAnimations();
@@ -49,6 +58,8 @@ private:
 
     void loadAddUserUI();
     void loadMainWindow();
+    void reloadMainWindow();
+    void loadStreamingWindow();
 };
 
 #endif // MAINWINDOW_H

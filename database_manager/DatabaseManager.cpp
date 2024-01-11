@@ -35,7 +35,7 @@ bool DatabaseManager::initializeDatabase() {
             description TEXT,
             releaseDate TEXT,
             duration INTEGER,
-            genre TEXT,
+            genres TEXT,
             rating TEXT,
             path TEXT,
             thumbnailPath TEXT,
@@ -52,7 +52,7 @@ bool DatabaseManager::initializeDatabase() {
             description TEXT,
             category TEXT,
             rating INTEGER,
-            genre TEXT,
+            genres TEXT,
             thumbnailPath TEXT,
             mediaList TEXT
         );
@@ -69,6 +69,7 @@ bool DatabaseManager::initializeDatabase() {
         CREATE TABLE IF NOT EXISTS UserMetadata (
             userName TEXT,
             clientName TEXT,
+            profilePic TEXT,
             favList TEXT,
             repList TEXT,
             watchLater TEXT,
@@ -186,6 +187,46 @@ MediaCollection DatabaseManager::getMediaCollection(int id)
     return collection;
 }
 
+std::vector<MediaMetadata> DatabaseManager::getAllMediaItems() {
+    std::string sql = "SELECT id FROM MediaMetadata;";
+
+    sqlite3_stmt* stmt;
+    sqlite3* db = loadDB(dbPath);
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+
+    std::vector<MediaMetadata> allmediametadata;
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        allmediametadata.push_back(getMediaItem(id));
+    }
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+
+    return allmediametadata;
+}
+
+std::vector<int> DatabaseManager::getAllMediaItemIDs() {
+    std::string sql = "SELECT id FROM MediaMetadata;";
+
+    sqlite3_stmt* stmt;
+    sqlite3* db = loadDB(dbPath);
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+
+    std::vector<int> allmediametadata;
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        allmediametadata.push_back(id);
+    }
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+
+    return allmediametadata;
+}
+
 
 int DatabaseManager::addMediaItem(MediaMetadata& media) {
     std::string sql = "INSERT INTO MediaMetadata (title, description, releaseDate, duration, genre, rating, path, thumbnailPath, groupId) "
@@ -201,7 +242,7 @@ int DatabaseManager::addMediaItem(MediaMetadata& media) {
     sqlite3_bind_text(stmt, 2, media.getDescription().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, 3, media.getReleaseDate().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_int(stmt, 4, media.getDuration());
-    sqlite3_bind_text(stmt, 5, media.getGenre().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, media.getGenres().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_double(stmt, 6, media.getRating());
     sqlite3_bind_text(stmt, 7, media.getPath().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, 8, media.getThumbnailPath().c_str(), -1, SQLITE_TRANSIENT);
@@ -349,11 +390,11 @@ void DatabaseManager::addTicket(const std::string& clientName, const std::string
 
 }
 
-bool DatabaseManager::addUser(const std::string& clientName, const std::string &userName) {
+bool DatabaseManager::addUser(const std::string& clientName, const std::string &userName, const std::string &profilePic) {
     sqlite3* db = loadDB(dbPath);
 
-    std::string sqlQuery = "INSERT OR IGNORE INTO UserMetadata (userName, clientName, favList, "
-                           "repList, watchLater, watched, watching) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    std::string sqlQuery = "INSERT OR IGNORE INTO UserMetadata (userName, clientName, profilePic, favList, "
+                           "repList, watchLater, watched, watching) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     bool inserted = true;
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sqlQuery.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
@@ -361,11 +402,12 @@ bool DatabaseManager::addUser(const std::string& clientName, const std::string &
 
         sqlite3_bind_text(stmt, 1, userName.c_str(), -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 2, clientName.c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 3, "", -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 3, profilePic.c_str(), -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 4, "", -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 5, "", -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 6, "", -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 7, "", -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 8, "", -1, SQLITE_STATIC);
 
         if (sqlite3_step(stmt) != SQLITE_DONE) {
             inserted = false;
@@ -405,11 +447,11 @@ bool DatabaseManager::deleteUser(const std::string& clientName, const std::strin
     return inserted;
 }
 
-std::vector<std::string> DatabaseManager::getUsers(const std::string& clientName) {
+void DatabaseManager::getUsers(const std::string& clientName, std::vector<std::string>& user_list, std::vector<std::string>& profile_pics) {
     std::string sqlQuery = "SELECT * FROM UserMetadata WHERE clientName = ?";
 
     sqlite3_stmt* stmt;
-    std::vector<std::string> user_list;
+
 
     sqlite3* db = loadDB(dbPath);
 
@@ -418,7 +460,9 @@ std::vector<std::string> DatabaseManager::getUsers(const std::string& clientName
 
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             std::string user = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            std::string profPic = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
             user_list.push_back(user);
+            profile_pics.push_back(profPic);
 
         }
     }
@@ -431,7 +475,7 @@ std::vector<std::string> DatabaseManager::getUsers(const std::string& clientName
     // Finalize the statement to prevent memory leaks
     sqlite3_finalize(stmt);
     sqlite3_close(db);
-    return user_list;
+
 }
 
 

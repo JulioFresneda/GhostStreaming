@@ -93,24 +93,31 @@ void SplashScreen::animateButtonAppearance(QToolButton *button) {
 void SplashScreen::loadUserButtons() {
     qDebug() << "Loading user buttons";
 
-    std::vector<std::string> users = getUsers(); // Replace with your actual logic
-    users.push_back("newuser");
+    std::vector<std::string> userList;
+    std::vector<std::string> profilePics;
+
+    ServerCommunication::GetUsers("http://0.0.0.0:18080/user/list","bot1", userList, profilePics);
+
+     // Replace with your actual logic
+    userList.push_back("newuser");
+    profilePics.push_back("newuser.png");
 
     int buttonSize = 50; // Fixed size for square buttons
     int iconSize = 50; // Size of the icon
     int textHeight = 20; // Height allocated for text
 
     QWidget *buttonContainer = new QWidget(this);
-    QHBoxLayout *layout = new QHBoxLayout(buttonContainer);
-    buttonContainer->setLayout(layout);
+    buttonsLayout = new QHBoxLayout(buttonContainer);
+    buttonContainer->setLayout(buttonsLayout);
 
     qDebug() << "Iterating user buttons";
 
-    for (int i = 0; i < users.size(); ++i) {
+    for (int i = 0; i < userList.size(); ++i) {
 
-        QToolButton *userButton = new QToolButton(buttonContainer);        userButton->setIcon(QIcon(("/home/juliofgx/CLionProjects/GhostStreaming/GhostStreamingClient/img/" + users[i] + ".png").c_str())); // Set the image
+        QToolButton *userButton = new QToolButton(buttonContainer);
+        userButton->setIcon(QIcon(("/home/juliofgx/CLionProjects/GhostStreaming/GhostStreamingClient/img/" + profilePics[i]).c_str())); // Set the image
         userButton->setIconSize(QSize(iconSize, iconSize)); // Set the icon size
-        userButton->setText(QString(users[i].c_str()));
+        userButton->setText(QString(userList[i].c_str()));
         userButton->setFixedSize(buttonSize, buttonSize+textHeight); // Adjust size for icon + text
         userButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
@@ -121,13 +128,17 @@ void SplashScreen::loadUserButtons() {
         opacityEffect->setOpacity(0.0); // Start with button invisible
         userButton->setGraphicsEffect(opacityEffect);
 
-        layout->addWidget(userButton); // Add to the container layout
+        buttonsLayout->addWidget(userButton); // Add to the container layout
 
         animateButtonAppearance(userButton);
         qDebug() << "Added button for User" << i + 1;
 
-        if(users[i] == "newuser"){
+        if(userList[i] == "newuser"){
             connect(userButton, &QPushButton::clicked, this, &SplashScreen::onNewUserClicked);
+        }
+        else{
+            userSelected = userList[i];
+            connect(userButton, &QPushButton::clicked, this, &SplashScreen::userClicked);
         }
     }
 
@@ -142,14 +153,30 @@ void SplashScreen::loadUserButtons() {
     buttonContainer->show(); // Make sure it's visible
 }
 
-std::vector<std::string> SplashScreen::getUsers() {
-    // Implement this method to return the actual number of users
-    std::vector<std::string> user_list = ServerCommunication::GetUsers("http://0.0.0.0:18080/user/list","bot1");
-    return user_list;
-
+void clearLayout(QLayout *layout) {
+    while (QLayoutItem *item = layout->takeAt(0)) {
+        if (QWidget *widget = item->widget()) {
+            widget->deleteLater();
+        } else if (QLayout *childLayout = item->layout()) {
+            clearLayout(childLayout);
+        }
+        delete item;
+    }
 }
 
-void SplashScreen::onNewUserClicked() {
+void SplashScreen::reloadUserButtons(){
+    clearLayout(buttonsLayout);
+    loadUserButtons();
+}
+
+void SplashScreen::userClicked() {
     qDebug() << "Add User button clicked";
+    emit userSelectedSignal();
+}
+
+
+
+void SplashScreen::onNewUserClicked() {
+    qDebug() << "User button clicked:" << userSelected;
     emit addUserSignal();
 }

@@ -18,6 +18,9 @@ class SplashScreen : public QWidget {
 
 public:
     explicit SplashScreen(QWidget *parent = nullptr);
+    void reloadUserButtons();
+
+    std::string userSelected;
 
 private:
     QLabel *logoLabel;
@@ -26,16 +29,23 @@ private:
     QSequentialAnimationGroup *animationGroup;
     QParallelAnimationGroup *parallelGroup;
 
+    QHBoxLayout *buttonsLayout;
+
     void setupUI();
     void setupAnimations();
     void animateTitleDisappearance();
     void loadUserButtons();
+
+
     void animateButtonAppearance(QToolButton *button);
-    std::vector<std::string> getUsers();
+
     void onNewUserClicked();
+    void userClicked();
+
 
 signals:
     void addUserSignal();
+    void userSelectedSignal();
 
 };
 

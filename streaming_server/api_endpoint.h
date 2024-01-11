@@ -8,6 +8,8 @@
     #include "crow.h"
     #include "DatabaseManager.h"
     #include "ClientManagement.h"
+    #include <json.hpp>
+    using json = nlohmann::json;
 
     class APIEndpoint {
     public:

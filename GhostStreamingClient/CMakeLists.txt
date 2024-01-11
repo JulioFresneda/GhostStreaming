@@ -31,11 +31,15 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(GhostStreamingClient
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        selectuser.h selectuser.cpp
+
         servercommunication.h servercommunication.cpp
         AddUserWidget.ui
         AddUserWidget.h AddUserWidget.cpp
         SplashScreen.h SplashScreen.cpp
+        streamingwindow.h streamingwindow.cpp streamingwindow.ui
+        horizontalmediaselector.h horizontalmediaselector.cpp horizontalmediaselector.ui
+
+
 
 
     )

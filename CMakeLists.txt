@@ -54,6 +54,8 @@ add_executable(GhostStreamingServer
         streaming_server/User.h
         streaming_server/ClientManagement.cpp
         streaming_server/ClientManagement.h
+        streaming_server/MetadataManagement.cpp
+        streaming_server/MetadataManagement.h
         # Add any other source files for the server app here
 )
 
