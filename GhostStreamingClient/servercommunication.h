@@ -5,7 +5,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
+#include "json.hpp"
 
+using json = nlohmann::json;
 
 class ServerCommunication
 {
@@ -13,7 +16,8 @@ public:
     ServerCommunication();
     static void GetUsers(std::string url, std::string clientName, std::vector<std::string>& userList, std::vector<std::string>& profilePics);
     static std::vector<std::string> AddUser(std::string url, std::string clientName, std::string newUsername, std::string profilePic);
-    static void GetGenres();
+    static std::map<std::string, std::vector<int>> GetGenres();
+    json GetMediaItem();
 };
 
 #endif // SERVERCOMMUNICATION_H
