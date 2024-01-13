@@ -17,7 +17,7 @@ public:
     static void GetUsers(std::string url, std::string clientName, std::vector<std::string>& userList, std::vector<std::string>& profilePics);
     static std::vector<std::string> AddUser(std::string url, std::string clientName, std::string newUsername, std::string profilePic);
     static std::map<std::string, std::vector<int>> GetGenres();
-    json GetMediaItem();
+    static json GetMediaItem(int id);
 };
 
 #endif // SERVERCOMMUNICATION_H

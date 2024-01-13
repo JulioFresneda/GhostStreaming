@@ -71,8 +71,6 @@ add_executable(GhostStreamingAddMedia
         # Add any other source files for the add-media app here
 )
 
-add_executable(GhostStreamingClient streaming_client/StreamingClient.cpp streaming_client/StreamingClient.h
-        streaming_client/main.cpp)
 
 # Link GhostStreamingServer executable with the FFmpeg, Boost, and SQLite3 libraries
 target_link_libraries(GhostStreamingServer
@@ -94,10 +92,3 @@ target_link_libraries(GhostStreamingAddMedia
         ${Boost_LIBRARIES}
         ${SQLite3_LIBRARIES})
 
-target_link_libraries(GhostStreamingClient
-        ${AVFORMAT_LIBRARIES}
-        ${AVCODEC_LIBRARIES}
-        ${AVUTIL_LIBRARIES}
-        ${Boost_LIBRARIES}
-        ${SQLite3_LIBRARIES}
-        vlc vlccore)

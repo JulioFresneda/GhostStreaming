@@ -1,5 +1,7 @@
 #include "servercommunication.h"
 
+#include <string>
+
 
 ServerCommunication::ServerCommunication() {}
 
@@ -178,15 +180,17 @@ std::map<std::string, std::vector<int>> ServerCommunication::GetGenres() {
 }
 
 
-json ServerCommunication::GetMediaItem() {
+json ServerCommunication::GetMediaItem(int id) {
     CURL *curl;
     CURLcode res;
     std::string readBuffer;
-    std::string url = "http://0.0.0.0:18080/metadata/bygenre";
-    std::map<std::string, std::vector<int>> genres;
+    std::string url = "http://0.0.0.0:18080/media/" + std::to_string(id);
+
 
     curl_global_init(CURL_GLOBAL_ALL);
     curl = curl_easy_init();
+
+    json response;
 
     if(curl) {
         struct curl_slist *headers = nullptr;
@@ -202,7 +206,7 @@ json ServerCommunication::GetMediaItem() {
         if(res != CURLE_OK) {
             std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
         } else {
-            genres = parseJsonMap(readBuffer);
+            response = json::parse(readBuffer);
         }
 
         curl_slist_free_all(headers); // Free the header list
@@ -210,7 +214,7 @@ json ServerCommunication::GetMediaItem() {
     }
 
     curl_global_cleanup(); // Clean up global state
-    return genres;
+    return response;
 }
 
 
